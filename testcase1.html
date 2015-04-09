@@ -1,0 +1,163 @@
+<html>
+	<head>
+		<script src="jquery-1.11.2.js"></script>
+		<style>
+
+
+			body {
+				font-family:"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
+				font-size:14px;
+				line-height:1.4285;
+				color:#333;
+				background-color:#fff;
+
+			}
+			.container {
+				width:970px;
+				padding-right:15px;
+				padding-left:15px;
+				margin-right:auto;
+				margin-left:auto;
+				box-sizing:border-box;
+
+			}
+			p { 
+				margin:0 0 10px;
+				display:block;
+				-webkit-margin-before:1em;
+				-webkit-margin-after:1em;
+				-webkit-margin-start:0px;
+				-webkit-margin-end:0px;
+
+			}
+
+			#base{
+				position:relative;
+				width:940px;
+				height:450px;
+				box-sizing:border-box;
+			}
+
+			#treemap {
+				width:640px;
+				height:450px;
+			}
+			/*
+
+			#annotations {
+				position:absolute;
+				width:300px;
+				height:450px;
+				padding:0 0.5em 0 0;
+			}
+			*/
+
+		</style>
+	</head>
+	<body onload="f()">
+
+	<div id="element"></div>
+<div class="container">
+	<div class="cols">
+		<p>
+			<span class="dropcap">E</span>very year, on the day of the budget, the share market shows considerable movement.
+			For example, <a class="urlfilter" href="?Year=2007&amp;By=Sector&amp;Sector=">in 2007, <em>every sector fell</em></a> with the exception of Tobacco.
+			The <a class="urlfilter" href="?Year=2007&amp;By=Sector&amp;Sector=">same happened in 2009</a> as well.
+			But in <a class="urlfilter" href="?Year=2007&amp;By=Sector&amp;Sector=">2010, every sector except Tobacco rose</a>.
+		</p>
+		<p>
+			<span class="dropcap">S</span>imilarly,
+			<a class="urlfilter" href="?Year=2012&amp;By=Sector%7CName&amp;Sector=Banking%20%26%20Financial%20Services">almost every banking stock fell in 2012</a>
+			with the notable exception of HDFC, whereas in
+			<a class="urlfilter" href="?Year=2010&amp;By=Sector%7CName&amp;Sector=Banking%20%26%20Financial%20Services">2010, almost every banking stock rose</a>.
+			<a class="urlfilter" href="?By=Sector%7CName&amp;Sector=Tobacco">Tobacco</a> (which is dominated by ITC) has grown on every budget day since 2004, except in 2010 and 2013.
+			On the other hand,
+			<a class="urlfilter" href="?By=Sector%7CName&amp;Sector=Media%20%26%20Entertainment">Media &amp; Entertainment</a> has shrunk in every budget, except in 2011 and 2012.
+		</p>
+		<p>
+			<span class="dropcap">I</span>n this visualisation, you can explore the market's reaction on every budget day from 2004 to 2014. The size of the box represents the market cap of the company or sector on the morning of the budget. The colour represents the
+			<span class="change" style="background-color:#005726;color:#fff">growth</span> or <span class="change" style="background-color:#D73027;color:#fff">shrinkage</span> on the day of the budget.
+		</p>
+		<p><strong>Source</strong>: <a href="http://www.moneycontrol.com/">Moneycontrol.com</a></p>
+		<p></p>
+	</div>
+	<div id="base">
+		<svg id="treemap" viewBox="0 0 640 450" preserveAspectRatio="xMinYMin meet">
+			<g class="rects">
+				<rect id = "mm" class="node urlfilter" stroke="#fff" title="Metals &amp; Mining shrunk by +5.7%: from 470,253 cr to 443,323cr" href="?By=Sector|Name&amp;Sector=Metals%20%26%20Mining" fill="#c72d24" height="117" width="221" y="143.33333333333334" x="221" data-original-title="Metals &amp; Mining shrunk by +1.8%: from 692,434 cr to 679,728cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Information Technology shrunk by +3.4%: from 360,137 cr to 347,748cr" href="?By=Sector|Name&amp;Sector=Information%20Technology" fill="#e37156" height="71.66666666666667" width="283" y="260.3333333333333" x="0" data-original-title="Information Technology shrunk by +0.1%: from 646,354 cr to 645,647cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Chemicals shrunk by +3.8%: from 81,245 cr to 78,192cr" href="?By=Sector|Name&amp;Sector=Chemicals" fill="#e1634d" height="38.666666666666664" width="118" y="384.3333333333333" x="447" data-original-title="Chemicals shrunk by +0.6%: from 156,698 cr to 155,801cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Telecommunication shrunk by +5.3%: from 302,741 cr to 286,679cr" href="?By=Sector|Name&amp;Sector=Telecommunication" fill="#d02f26" height="59.333333333333336" width="283" y="332" x="0" data-original-title="Telecommunication shrunk by +1.5%: from 212,704 cr to 209,583cr"></rect>
+				<rect id="manufacturing" class="node urlfilter" stroke="#fff" title="Manufacturing shrunk by +4.6%: from 100,955 cr to 96,285cr" href="?By=Sector|Name&amp;Sector=Manufacturing" fill="#da3f32" height="34.333333333333336" width="164" y="415.6666666666667" x="283" data-original-title="Manufacturing shrunk by +1.1%: from 122,803 cr to 121,419cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Miscellaneous shrunk by +2.2%: from 39,396 cr to 38,519cr" href="?By=Sector|Name&amp;Sector=Miscellaneous" fill="#eda37b" height="27" width="83" y="423" x="541" data-original-title="Miscellaneous shrunk by +0.0%: from 83,627 cr to 83,600cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Pharmaceuticals shrunk by +1.8%: from 156,674 cr to 153,841cr" href="?By=Sector|Name&amp;Sector=Pharmaceuticals" fill="#f1b488" height="72.33333333333333" width="124" y="260.3333333333333" x="414"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Cement &amp; Construction shrunk by +5.0%: from 127,994 cr to 121,593cr" href="?By=Sector|Name&amp;Sector=Cement%20%26%20Construction" fill="#d73027" height="43.333333333333336" width="164" y="332.6666666666667" x="283" data-original-title="Cement &amp; Construction shrunk by +0.1%: from 157,031 cr to 156,804cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Automotive shrunk by +3.3%: from 167,904 cr to 162,387cr" href="?By=Sector|Name&amp;Sector=Automotive" fill="#e5775b" height="72.33333333333333" width="131" y="260.3333333333333" x="283"></rect>
+				<rect id="cd" class="node urlfilter" stroke="#fff" title="Consumer Durables shrunk by +4.0%: from 6,013 cr to 5,774cr" href="?By=Sector|Name&amp;Sector=Consumer%20Durables" fill="#df5a46" height="27" width="16" y="423" x="624"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Services shrunk by +4.1%: from 297,355 cr to 285,087cr" href="?By=Sector|Name&amp;Sector=Services" fill="#de5442" height="58.666666666666664" width="283" y="391.3333333333333" x="0" data-original-title="Services shrunk by +1.9%: from 228,412 cr to 224,071cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Food &amp; Beverages shrunk by +4.5%: from 94,342 cr to 90,101cr" href="?By=Sector|Name&amp;Sector=Food%20%26%20Beverages" fill="#db4536" height="51.666666666666664" width="102" y="332.6666666666667" x="447" data-original-title="Food &amp; Beverages shrunk by +0.7%: from 124,645 cr to 123,716cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Retail &amp; Real Estate shrunk by +6.3%: from 134,052 cr to 125,573cr" href="?By=Sector|Name&amp;Sector=Retail%20%26%20Real%20Estate" fill="#bb2a22" height="72.33333333333333" width="102" y="260.3333333333333" x="538" data-original-title="Retail &amp; Real Estate shrunk by +0.6%: from 106,055 cr to 105,446cr"></rect>
+				<rect id="bfs" class="node urlfilter" stroke="#fff" title="Banking &amp; Financial Services shrunk by +7.5%: from 865,672 cr to 800,914cr" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services" fill="#a2241e" height="143.33333333333334" width="326" y="0" x="0" data-original-title="Banking &amp; Financial Services shrunk by +1.7%: from 1,186,037 cr to 1,165,462cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Engineering &amp; Capital Goods shrunk by +6.4%: from 473,763 cr to 443,378cr" href="?By=Sector|Name&amp;Sector=Engineering%20%26%20Capital%20Goods" fill="#b92922" height="117" width="221" y="143.33333333333334" x="0" data-original-title="Engineering &amp; Capital Goods shrunk by +1.9%: from 420,824 cr to 412,944cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Media &amp; Entertainment shrunk by +5.7%: from 53,089 cr to 50,045cr" href="?By=Sector|Name&amp;Sector=Media%20%26%20Entertainment" fill="#c72c24" height="38.666666666666664" width="75" y="384.3333333333333" x="565" data-original-title="Media &amp; Entertainment shrunk by +2.2%: from 62,750 cr to 61,350cr"></rect>
+				<rect id = "ong" class="node urlfilter" stroke="#fff" title="Oil &amp; Gas shrunk by +5.5%: from 813,065 cr to 768,302cr" href="?By=Sector|Name&amp;Sector=Oil%20%26%20Gas" fill="#cc2e25" height="143.33333333333334" width="314" y="0" x="326" data-original-title="Oil &amp; Gas shrunk by +3.4%: from 808,266 cr to 781,183cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Conglomerates shrunk by +5.0%: from 45,857 cr to 43,543cr" href="?By=Sector|Name&amp;Sector=Conglomerates" fill="#d63027" height="27" width="94" y="423" x="447"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Utilities shrunk by +6.8%: from 424,866 cr to 395,802cr" href="?By=Sector|Name&amp;Sector=Utilities" fill="#b02720" height="117" width="198" y="143.33333333333334" x="442" data-original-title="Utilities shrunk by +2.8%: from 409,299 cr to 397,710cr"></rect>
+				<rect class="node urlfilter" stroke="#fff" title="Consumer Non-durables shrunk by +0.7%: from 111,881 cr to 111,130cr" href="?By=Sector|Name&amp;Sector=Consumer%20Non-durables" fill="#fae3ab" height="39.666666666666664" width="164" y="376" x="283" data-original-title="Consumer Non-durables shrunk by +0.1%: from 187,665 cr to 187,440cr"></rect>
+				<rect id="tobacco" class="node urlfilter" stroke="#fff" title="Tobacco grew by +3.1%: from 78,521 cr to 80,925cr" href="?By=Sector|Name&amp;Sector=Tobacco" fill="#639861" height="51.666666666666664" width="91" y="332.6666666666667" x="549" data-original-title="Tobacco grew by +3.7%: from 171,225 cr to 177,540cr"></rect>
+			</g>
+			<g class="texts">
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="201.83333333333334" x="331.5">Metals &amp; Mining</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="296.16666666666663" x="141.5">Information Technology</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="403.66666666666663" x="506">Chemicals</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="361.6666666666667" x="141.5">Telecommunication</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="432.83333333333337" x="365">Manufacturing</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="436.5" x="582.5" font-size="70%">Miscellaneous</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="296.5" x="476">Pharmaceuticals</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="354.33333333333337" x="365" font-size="70%">Cement &amp; Construction</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="296.5" x="348.5">Automotive</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="420.66666666666663" x="141.5">Services</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="358.5" x="498" font-size="70%">Food &amp; Beverages</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="296.5" x="589" font-size="70%">Retail &amp; Real Estate</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="71.66666666666667" x="163">Banking &amp; Financial Services</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="201.83333333333334" x="110.5" font-size="70%">Engineering &amp; Capital Goods</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="403.66666666666663" x="602.5" opacity="0" font-size="70%">Media &amp; Entertainment</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="71.66666666666667" x="483">Oil &amp; Gas</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="436.5" x="494" font-size="70%">Conglomerates</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="201.83333333333334" x="541">Utilities</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#000000" y="395.8333333333333" x="365" font-size="70%">Consumer Non-durables</text>
+				<text class="legend" dy=".35em" text-anchor="middle" fill="#ffffff" y="358.5" x="594.5">Tobacco</text>
+			</g>
+		</svg>
+	</div>
+	<div>
+		<p id="tobacco-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Tobacco</a> grew the most: by Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
+		<p id="cd-ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Consumer%20Durables">Consumer Durables</a> which only shrunk by Rs&nbsp;240&nbsp;cr <span class="change" style="background-color:#df5a46;color:#000000">-4.0%</span></p>
+		<p id="bfs-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Banking &amp; Financial Services</a> shrunk the most: by Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
+		<p id="ong-ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Oil%20%26%20Gas">Oil &amp; Gas</a> which shrunk by Rs&nbsp;44,762&nbsp;cr <span class="change" style="background-color:#cc2e25;color:#ffffff">-5.5%</span></p>
+		<p id="manufacturing-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Manufacturing</a> had the highest %growth:  Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
+		<p id="mm-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Metals &amp; Mining</a> had the highest %drop:  Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
+	</div>
+</div>
+		<script>
+			window.onload = function(){
+				alert("welcome");
+			};
+			function f(){
+				//alert("hello");
+				//var elem = document.getElementById("element");
+
+				//var sp = document.createElement("div");
+				//var p =document.createElement("p");
+				//p.appendChild(document.createTextNode("On Chesil Beach"));
+				//sp.appendChild(p);
+				//elem.appendChild(sp);
+				var svg = document.getElementById("tobacco_treemap");
+			
+				
+			};
+
+		</script>
+
+	</body>
+</html>
