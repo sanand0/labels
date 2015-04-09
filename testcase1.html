@@ -1,8 +1,10 @@
 <html>
 	<head>
+
+		<script src="https://code.jquery.com/jquery-1.11.2.js">
+		
+		</script>
 		<style>
-
-
 			body {
 				font-family:"Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif;
 				font-size:14px;
@@ -26,6 +28,7 @@
 				width:940px;
 				height:450px;
 				box-sizing:border-box;
+				margin-top:10px;
 			}
 
 			#treemap {
@@ -43,8 +46,26 @@
 			*/
 
 		</style>
+		<script>
+			/*window.onload = function(){
+				alert("Welcome");
+			}
+			*/
+
+			function layout(div,svg,pref,arr) {
+
+				/*
+					Do something with the layout function
+
+				*/
+			}
+			$( document ).ready(function() {
+				$("button").click(layout);
+			});
+
+		</script>
 	</head>
-	<body onload="f()">
+	<body>
 		<div class="container">
 			<div class="cols">
 				<p>
@@ -69,6 +90,8 @@
 				<p><strong>Source</strong>: <a href="http://www.moneycontrol.com/">Moneycontrol.com</a></p>
 				<p></p>
 			</div>
+			<button type="button">Layout elements</button>
+
 			<div id="base">
 				<svg id="treemap" viewBox="0 0 640 450" preserveAspectRatio="xMinYMin meet">
 					<g class="rects">
