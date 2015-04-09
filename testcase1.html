@@ -53,6 +53,8 @@
 			*/
 
 			function layout(div,svg,pref,arr) {
+				alert(div+" "+svg+" "+ pref);
+				alert(JSON.stringify(arr));
 
 				/*
 					Do something with the layout function
@@ -60,7 +62,18 @@
 				*/
 			}
 			$( document ).ready(function() {
-				$("button").click(layout);
+				$("button").click(function(event) {
+					
+					var annotation_array = new Object();
+					annotation_array["#tobacco"]="#tobacco_ann";
+					annotation_array["#ong"]="#ong_ann";
+					annotation_array["#bfs"]="#bfs_ann";
+					annotation_array["#cd"]="#cd_ann";
+					annotation_array["#manufacturing"]="#manufacturing_ann";
+					annotation_array["#mm"]="#mm_ann";
+					layout("#base","#treemap","left-border",annotation_array);
+				});
+
 			});
 
 		</script>
@@ -142,12 +155,12 @@
 				</svg>
 			</div>
 			<div>
-				<p id="tobacco-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Tobacco</a> grew the most: by Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
-				<p id="cd-ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Consumer%20Durables">Consumer Durables</a> which only shrunk by Rs&nbsp;240&nbsp;cr <span class="change" style="background-color:#df5a46;color:#000000">-4.0%</span></p>
-				<p id="bfs-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Banking &amp; Financial Services</a> shrunk the most: by Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
-				<p id="ong-ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Oil%20%26%20Gas">Oil &amp; Gas</a> which shrunk by Rs&nbsp;44,762&nbsp;cr <span class="change" style="background-color:#cc2e25;color:#ffffff">-5.5%</span></p>
-				<p id="manufacturing-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Manufacturing</a> had the highest %growth:  Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
-				<p id="mm-ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Metals &amp; Mining</a> had the highest %drop:  Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
+				<p id="tobacco_ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Tobacco</a> grew the most: by Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
+				<p id="cd_ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Consumer%20Durables">Consumer Durables</a> which only shrunk by Rs&nbsp;240&nbsp;cr <span class="change" style="background-color:#df5a46;color:#000000">-4.0%</span></p>
+				<p id="bfs_ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Banking &amp; Financial Services</a> shrunk the most: by Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
+				<p id="ong_ann">... followed by <a class="urlfilter" href="?By=Sector|Name&amp;Sector=Oil%20%26%20Gas">Oil &amp; Gas</a> which shrunk by Rs&nbsp;44,762&nbsp;cr <span class="change" style="background-color:#cc2e25;color:#ffffff">-5.5%</span></p>
+				<p id="manufacturing_ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Tobacco">Manufacturing</a> had the highest %growth:  Rs&nbsp;2,403&nbsp;cr <span class="change" style="background-color:#639861;color:#ffffff">+3.1%</span></p>
+				<p id="mm_ann"><a class="urlfilter" href="?By=Sector|Name&amp;Sector=Banking%20%26%20Financial%20Services">Metals &amp; Mining</a> had the highest %drop:  Rs&nbsp;64,759&nbsp;cr <span class="change" style="background-color:#a2241e;color:#ffffff">-7.5%</span></p>
 			</div>
 		</div>
 	</body>
