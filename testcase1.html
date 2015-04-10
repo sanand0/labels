@@ -26,7 +26,7 @@
 			#base{
 				position:relative;
 				width:940px;
-				height:450px;
+				height:750px;
 				box-sizing:border-box;
 				margin-top:10px;
 			}
@@ -52,26 +52,236 @@
 			}
 			*/
 
-			function layout(div,svg,pref,arr) {
-				alert(div+" "+svg+" "+ pref);
-				alert(JSON.stringify(arr));
+			/**
+				Converts string extracted from css property into number.
+				strips the string of the px at the end and converts to number. 
+				If string is not convertible to Number - returns 0
+			*/
+			function string_to_number(str){
+				str = str.slice(0,str.length-2);
+				var ret = Number(str);
+				if (!isNaN(ret)){
+					return ret;
+				}else {
+					return 0;
+				}
+			}
 
+			function layout(div,svg,pref,arr) {
+				var container_height = string_to_number($(div).css("height"));
+				var container_width = string_to_number($(div).css("width"));
+				var svg_height=string_to_number($(svg).css("height"));
+				var svg_width=string_to_number($(svg).css("width"));
+				var svg_offset = $(svg).offset();
 				/*
-					Do something with the layout function
+					position gives the position of this element w.r.t to its offset parent 
+					- might not be the svg element 
+				*/
+				
+
+				console.log(container_height);
+				console.log(container_width);
+				console.log(svg_height);
+				console.log(svg_width);
+				console.log(div+" :"+JSON.stringify($(div).offset()));
+				console.log(JSON.stringify(svg_offset));
+				console.log("svg position" + JSON.stringify($(svg).position()));
+					
+				/**
+					Creating a new Array of objects which contain annotation properties like :
+					annotation_selector,annotated element selector,x, y axis w.r.t 
+					SVG element 
+				*/
+				var annotation_array =[];
+				for (var prop in arr) {
+					if(arr.hasOwnProperty(prop)){
+
+						var prop_offset = $(prop).offset();
+
+						/**
+							calculating x and y co-ordinates of the element to be annotated 
+							by subtracting offset of property from offset of svg. 
+						*/
+						var prop_obj = {annotation_selector:arr[prop],
+							element_selector:prop,
+							y:prop_offset["top"]-svg_offset["top"],
+							x:prop_offset["left"]-svg_offset["left"]
+						}
+						annotation_array.push(prop_obj);
+						
+						console.log(JSON.stringify(prop_obj));
+
+					}
+				}
+				console.log(JSON.stringify(annotation_array));
+
+				switch(pref) {
+					case "left-border":
+						/**
+							positioning the SVG element w.r.t the div such that 
+							there is space on the left side for labelling.
+						*/
+						$(svg).css("position","absolute").css("left",container_width-svg_width+"px");
+						/**
+							sorting the annotations by y axis position within the SVG element,
+							because ordering has to happen vertically.
+						*/
+						annotation_array.sort(function(a,b){return a.y -b.y; });
+					break;
+
+					case "right-border":
+						$(svg).css("position","absolute").css("left","0px");
+						annotation_array.sort(function(a,b){return a.y -b.y; });
+
+					break;
+
+					case "top-border":
+						$(svg).css("position","absolute").css("top",container_height-svg_height+"px");
+						annotation_array.sort(function(a,b){return a.x -b.x; });
+
+					break;
+
+					case "bottom-border":
+						$(svg).css("position","absolute").css("top","0px");
+						annotation_array.sort(function(a,b){return a.x -b.x; });
+
+					break;
+
+				}
+
+				console.log(JSON.stringify(annotation_array));
+
+				/**
+					Defining a function which resets the width of the annotation to be equivalent 
+					to space available if required. 
+
+					Need to think about handling width/height of annotation elements.
+
+
+					Note to self : A Javascript functions f1 defined within a function f have access to all variables defined 
+					in f 
 
 				*/
+				var adjust_width_for_annotation = function(selector){
+					width = $(selector).width();
+					if(width > container_width-svg_width) {
+						$(selector).css("width",container_width-svg_width+"px");
+					}
+				}
+
+				/**
+					Defining a function which resets the width of the annotation to be equivalent 
+					to space available if required. 
+					Need to think about handling width/height of annotation elements.
+
+				*/
+				var adjust_height_for_annotation = function(selector){
+					
+					height = $(selector).height();
+					if(height > container_height-svg_height) {
+						$(selector).css("height",container_height-svg_height+"px");
+					}
+				}
+
+				/**
+
+					cycling through all the annotations in the array which have been ordered 
+					in order of laying out. Appending to div, adding css properties like position,
+				   	height/width where applicable
+
+				*/
+
+				for(var i =0; i < annotation_array.length;i++) {
+					$(annotation_array[i].annotation_selector).appendTo(div);
+
+					switch(pref) {
+
+						/**
+							In case the preference is to layout the annotations (labels) on the 
+							left or the right side -  the first heuristic I'm using is to place the 
+							labels also at the same coordinate on the y axis as the element to be annotated. 
+
+							There are some key aspects which need to be addressed :
+							- There might be multiple elements at the same Y coordinate and hence the labels 
+								may overlap
+							- There might be some minimum space policy required between labels
+							- A better policy w.r.t aesthetics might be to start laying out the labels 
+								from top to bottom based on their order but not strictly laying them out 
+								aligned to the Y coordinate of the annotated element. 
+							- The SVG element may be laid out in such a manner that there is space 
+								above and below the SVG element as well, in which case the first 
+								annotation should probably start at the beginning (top) of the div element
+									
+
+						*/
+						case "left-border":
+							$(annotation_array[i].annotation_selector).css("position","absolute")
+							.css("top",annotation_array[i].y+"px");
+
+							adjust_width_for_annotation(annotation_array[i].annotation_selector);
+
+						break;
+
+						case "right-border":
+							$(annotation_array[i].annotation_selector).css("position","absolute")
+							.css("top",annotation_array[i].y+"px")
+							.css("left",svg_width+"px");
+
+							adjust_width_for_annotation(annotation_array[i].annotation_selector);
+						break;
+
+						case "top-border":
+							$(annotation_array[i].annotation_selector).css("position","absolute")
+							.css("left",annotation_array[i].x+"px");
+
+							adjust_height_for_annotation(annotation_array[i].annotation_selector);
+						break;
+
+						case "bottom-border":
+							$(annotation_array[i].annotation_selector).css("position","absolute")
+							.css("left",annotation_array[i].x+"px")
+							.css("top",svg_height+"px");
+
+							adjust_height_for_annotation(annotation_array[i].annotation_selector);
+						break;
+
+					}
+
+				}
+
+
+				/**
+
+					Need to write the code for drawing lines to connect the annotations with 
+					the labelled elements. 
+
+					This code will largely be independent of the layout happening in the code chunk 
+					above, which will need to be tweaked. 
+
+
+				*/
+
 			}
+
+
+
+
+
 			$( document ).ready(function() {
 				$("button").click(function(event) {
 					
 					var annotation_array = new Object();
-					annotation_array["#tobacco"]="#tobacco_ann";
-					annotation_array["#ong"]="#ong_ann";
-					annotation_array["#bfs"]="#bfs_ann";
-					annotation_array["#cd"]="#cd_ann";
-					annotation_array["#manufacturing"]="#manufacturing_ann";
-					annotation_array["#mm"]="#mm_ann";
+					var annotation_array = {
+						'#tobacco':'#tobacco_ann',
+						'#ong':'#ong_ann',
+						'#bfs':'#bfs_ann',
+						'#cd':'#cd_ann',
+						'#manufacturing':'#manufacturing_ann',
+						'#mm':'#mm_ann'
+					};
 					layout("#base","#treemap","left-border",annotation_array);
+					
+
 				});
 
 			});
