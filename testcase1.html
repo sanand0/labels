@@ -87,11 +87,39 @@
 				console.log(JSON.stringify(svg_offset));
 				console.log("svg position" + JSON.stringify($(svg).position()));
 					
+
+				switch(pref) {
+					case "left-border":
+						/**
+							positioning the SVG element w.r.t the div such that 
+							there is space on the left side for labelling.
+						*/
+						$(svg).css("position","absolute").css("left",container_width-svg_width+"px");
+					break;
+
+					case "right-border":
+						$(svg).css("position","absolute").css("left","0px");
+
+					break;
+
+					case "top-border":
+						$(svg).css("position","absolute").css("top",container_height-svg_height+"px");
+
+					break;
+
+					case "bottom-border":
+						$(svg).css("position","absolute").css("top","0px");
+
+					break;
+
+				}
+
 				/**
 					Creating a new Array of objects which contain annotation properties like :
 					annotation_selector,annotated element selector,x, y axis w.r.t 
 					SVG element 
 				*/
+
 				var annotation_array =[];
 				for (var prop in arr) {
 					if(arr.hasOwnProperty(prop)){
@@ -115,41 +143,22 @@
 				}
 				console.log(JSON.stringify(annotation_array));
 
-				switch(pref) {
+				/**
+					sorting the annotations by y axis or x axis positions within the SVG element,
+					depending on preference of border on which labelling needs to happen.
+				*/
+				switch(pref){
 					case "left-border":
-						/**
-							positioning the SVG element w.r.t the div such that 
-							there is space on the left side for labelling.
-						*/
-						$(svg).css("position","absolute").css("left",container_width-svg_width+"px");
-						/**
-							sorting the annotations by y axis position within the SVG element,
-							because ordering has to happen vertically.
-						*/
-						annotation_array.sort(function(a,b){return a.y -b.y; });
-					break;
-
 					case "right-border":
-						$(svg).css("position","absolute").css("left","0px");
 						annotation_array.sort(function(a,b){return a.y -b.y; });
-
-					break;
-
+						break;
 					case "top-border":
-						$(svg).css("position","absolute").css("top",container_height-svg_height+"px");
-						annotation_array.sort(function(a,b){return a.x -b.x; });
-
-					break;
-
 					case "bottom-border":
-						$(svg).css("position","absolute").css("top","0px");
 						annotation_array.sort(function(a,b){return a.x -b.x; });
-
-					break;
-
+						break;
 				}
 
-				console.log(JSON.stringify(annotation_array));
+
 
 				/**
 					Defining a function which resets the width of the annotation to be equivalent 
@@ -250,6 +259,8 @@
 				}
 
 
+				
+
 				/**
 
 					Need to write the code for drawing lines to connect the annotations with 
@@ -261,6 +272,123 @@
 
 				*/
 
+				
+				var NS = "http://www.w3.org/2000/svg";
+				var svg_for_lines = document.createElementNS(NS,"svg");
+				svg_for_lines.setAttribute("width",container_width);
+				svg_for_lines.setAttribute("height",container_height);
+				svg_for_lines.setAttribute("id","svg_for_lines");
+				svg_for_lines.setAttribute("style","position:absolute;");
+
+				$(div).get(0).appendChild(svg_for_lines);
+
+				var create_line = function(x1,y1,x2,y2){
+					console.log("x1 :"+x1+", y1:"+y1+", x2:"+x2+", y2:"+y2);
+					var lineObj = document.createElementNS(NS,'line');
+					lineObj.setAttribute("x1",x1);
+					lineObj.setAttribute("y1",y1);
+					lineObj.setAttribute("x2",x2);
+					lineObj.setAttribute("y2",y2);
+					lineObj.setAttribute("style","stroke:rgb(0,0,0);stroke-width:1;opacity:0.5");
+					return lineObj;
+				}
+
+
+
+				for(var i =0; i < annotation_array.length;i++) {
+
+					/**
+						The inner height/width property is used because it takes into account the padding and the 
+						content height. So when computing the X,Y co-ordinates of the lines the correct 
+						height/width to use is the inner height property. 
+
+						(Note to self - look at outerHeight and Height also, when trying to understand the choice.)
+
+						Lines are drawn for each annotated element based on the assumption that the 
+						annotated element and the label are both rectangles. Depending on the preference of the 
+						labelling the x1,y1,x2,y2 co-ordinates of the line are drawn. 
+
+						Things to consider :
+						- There might be a requirement to draw a line from  a particular part of the 
+							label (like in the budget example) 
+						- The line is currently drawn connecting the border of both elements, it might be 
+							necessary to draw the line a little more into the annotated element, or draw the 
+							line to a fragment of the annotated element (like the point above)
+						- It might be necessary in some cases to have a line which is not straight 
+							(might be two straight lines or might be a curve depending on what looks 
+							elegant and what is the exact problem you are solving).
+
+
+
+
+					*/
+					var label_height = $(annotation_array[i].annotation_selector).innerHeight()
+					var label_width = $(annotation_array[i].annotation_selector).innerWidth()
+					
+					var label_position = $(annotation_array[i].annotation_selector).position();
+					console.log(label_position);
+					
+					var x_label = label_position.left;
+					var y_label = label_position.top;
+
+					var element_bounding_rect = $(annotation_array[i].element_selector).get(0).getBoundingClientRect();
+
+					console.log("Element selector:"+annotation_array[i].element_selector);
+
+					console.log("x_label:"+x_label);
+					console.log("y_label:"+y_label);
+					console.log("label_width:"+label_width);
+					console.log("label_height:"+label_height);
+					console.log("element height:"+JSON.stringify(element_bounding_rect));
+
+					switch(pref) {
+
+						case "left-border":
+
+
+
+							var line = create_line(x_label+label_width,
+							y_label+(label_height/2),
+							annotation_array[i].x,
+							annotation_array[i].y + (element_bounding_rect.height/2));	
+
+							$("#svg_for_lines").get(0).appendChild(line);
+							
+
+						break;
+
+						case "right-border":
+							var line = create_line(x_label,
+							y_label+(label_height/2),
+							annotation_array[i].x+element_bounding_rect.width,
+							annotation_array[i].y + (element_bounding_rect.height/2));	
+
+							$("#svg_for_lines").get(0).appendChild(line);
+
+
+						break;
+
+						case "top-border":
+							var line = create_line(x_label +(label_width/2),
+							y_label+label_height,
+							annotation_array[i].x+(element_bounding_rect.width/2),
+							annotation_array[i].y);	
+
+							$("#svg_for_lines").get(0).appendChild(line);
+						break;
+
+						case "bottom-border":
+							var line = create_line(x_label +(label_width/2),
+							y_label,
+							annotation_array[i].x+(element_bounding_rect.width/2),
+							annotation_array[i].y+element_bounding_rect.height);	
+
+							$("#svg_for_lines").get(0).appendChild(line);
+						break;
+
+					}
+
+				}
 			}
 
 
@@ -280,6 +408,7 @@
 						'#mm':'#mm_ann'
 					};
 					layout("#base","#treemap","left-border",annotation_array);
+					
 					
 
 				});
