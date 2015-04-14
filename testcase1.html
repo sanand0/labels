@@ -68,51 +68,38 @@
 			}
 
 			function layout(div,svg,pref,arr) {
+
+				/**
+					calculating basic height/width and div position properties for 
+					calculations later in the function
+				*/
+
 				var container_height = string_to_number($(div).css("height"));
 				var container_width = string_to_number($(div).css("width"));
 				var svg_height=string_to_number($(svg).css("height"));
 				var svg_width=string_to_number($(svg).css("width"));
-				var svg_offset = $(svg).offset();
-				/*
-					position gives the position of this element w.r.t to its offset parent 
-					- might not be the svg element 
-				*/
+				var div_positions = $(div).offset();
 				
 
-				console.log(container_height);
-				console.log(container_width);
-				console.log(svg_height);
-				console.log(svg_width);
-				console.log(div+" :"+JSON.stringify($(div).offset()));
-				console.log(JSON.stringify(svg_offset));
-				console.log("svg position" + JSON.stringify($(svg).position()));
+				/**
+					Defining css settings for svg position based on 
+					label arrangement preferences.	
+				*/
+
 					
+				var svg_positioning_css_settings = {'left-border':{'left':container_width-svg_width+'px'},
+					'right-border':{'left':'0px'},
+					'top-border':{'top':container_height-svg_height+"px"},
+					'bottom-border':{'top':'0px'}
+				};
 
-				switch(pref) {
-					case "left-border":
-						/**
-							positioning the SVG element w.r.t the div such that 
-							there is space on the left side for labelling.
-						*/
-						$(svg).css("position","absolute").css("left",container_width-svg_width+"px");
-					break;
+				/**
+					positioning the SVG element w.r.t the div 
+				*/
 
-					case "right-border":
-						$(svg).css("position","absolute").css("left","0px");
+				$(svg).css("position","absolute").css(svg_positioning_css_settings[pref]);
 
-					break;
 
-					case "top-border":
-						$(svg).css("position","absolute").css("top",container_height-svg_height+"px");
-
-					break;
-
-					case "bottom-border":
-						$(svg).css("position","absolute").css("top","0px");
-
-					break;
-
-				}
 
 				/**
 					Creating a new Array of objects which contain annotation properties like :
@@ -120,138 +107,115 @@
 					SVG element 
 				*/
 
-				var annotation_array =[];
+				var annotated_elements =[];
 				for (var prop in arr) {
 					if(arr.hasOwnProperty(prop)){
 
-						var prop_offset = $(prop).offset();
+						var element_positions = $(prop).offset();
 
 						/**
 							calculating x and y co-ordinates of the element to be annotated 
-							by subtracting offset of property from offset of svg. 
+							by subtracting position of element from position of div. 
 						*/
-						var prop_obj = {annotation_selector:arr[prop],
+						var div_positions = $(div).offset();
+						var annotated_element = {annotation_selector:arr[prop],
 							element_selector:prop,
-							y:prop_offset["top"]-svg_offset["top"],
-							x:prop_offset["left"]-svg_offset["left"]
+							y:element_positions["top"]-div_positions["top"],
+							x:element_positions["left"]-div_positions["left"]
 						}
-						annotation_array.push(prop_obj);
+						annotated_elements.push(annotated_element);
 						
-						console.log(JSON.stringify(prop_obj));
+						console.log("final annotated elements:"+JSON.stringify(annotated_element));
 
 					}
 				}
-				console.log(JSON.stringify(annotation_array));
 
 				/**
-					sorting the annotations by y axis or x axis positions within the SVG element,
+					sorting the annotations by y axis or x axis positions of the elements to be annotated,
 					depending on preference of border on which labelling needs to happen.
 				*/
-				switch(pref){
-					case "left-border":
-					case "right-border":
-						annotation_array.sort(function(a,b){return a.y -b.y; });
-						break;
-					case "top-border":
-					case "bottom-border":
-						annotation_array.sort(function(a,b){return a.x -b.x; });
-						break;
-				}
 
+
+				
+				var sort_labels_by_y_axis = function(a,b) {return a.y - b.y;};
+				var sort_labels_by_x_axis = function(a,b) {return a.x - b.x;};
+
+				var sorting_preferences = {'left-border':sort_labels_by_y_axis,
+					'right-border':sort_labels_by_y_axis,
+					'top-border':sort_labels_by_x_axis,
+					'bottom-border':sort_labels_by_x_axis
+				};
+
+				annotated_elements.sort(sorting_preferences[pref]);
 
 
 				/**
-					Defining a function which resets the width of the annotation to be equivalent 
-					to space available if required. 
-
-					Need to think about handling width/height of annotation elements.
-
-
-					Note to self : A Javascript functions f1 defined within a function f have access to all variables defined 
-					in f 
-
-				*/
-				var adjust_width_for_annotation = function(selector){
-					width = $(selector).width();
-					if(width > container_width-svg_width) {
-						$(selector).css("width",container_width-svg_width+"px");
-					}
-				}
-
-				/**
-					Defining a function which resets the width of the annotation to be equivalent 
-					to space available if required. 
-					Need to think about handling width/height of annotation elements.
-
-				*/
-				var adjust_height_for_annotation = function(selector){
-					
-					height = $(selector).height();
-					if(height > container_height-svg_height) {
-						$(selector).css("height",container_height-svg_height+"px");
-					}
-				}
-
-				/**
-
 					cycling through all the annotations in the array which have been ordered 
 					in order of laying out. Appending to div, adding css properties like position,
 				   	height/width where applicable
 
 				*/
 
-				for(var i =0; i < annotation_array.length;i++) {
-					$(annotation_array[i].annotation_selector).appendTo(div);
 
+				for(var i =0; i < annotated_elements.length;i++) {
+
+
+					/**
+						In case the preference is to layout the annotations (labels) on the 
+						left or the right side -  the first heuristic I'm using is to place the 
+						labels also at the same coordinate on the y axis as the element to be annotated. 
+
+						There are some key aspects which need to be addressed :
+						- There might be multiple elements at the same Y coordinate and hence the labels 
+							may overlap
+						- There might be some minimum space policy required between labels
+						- A better policy w.r.t aesthetics might be to start laying out the labels 
+							from top to bottom based on their order but not strictly laying them out 
+							aligned to the Y coordinate of the annotated element. 
+						- The SVG element may be laid out in such a manner that there is space 
+							above and below the SVG element as well, in which case the first 
+							annotation should probably start at the beginning (top) of the div element
+
+					*/
+					$(annotated_elements[i].annotation_selector).appendTo(div);
+					var label_positioning_css_settings = {'left-border':{'top':annotated_elements[i].y+'px'},
+						'right-border':{'top':annotated_elements[i].y+'px','left':svg_width+'px'},
+						'top-border':{'left':annotated_elements[i].x+'px'},
+						'bottom-border':{'top':svg_height+'px','left':annotated_elements[i].x+'px'}
+					};
+
+
+					$(annotated_elements[i].annotation_selector).css("position","absolute")
+						.css(label_positioning_css_settings[pref]);
+
+
+					/**
+						Can't find an acceptable way to implement data driven programming
+						while adjusting height/width of the labels. 
+
+						Note to self : Don't really need to worry, because this part of the code 
+						is now redundant after conversation with Anand. 
+
+						Will implement the width adjustment of the elements based on user preference 
+						in next iteration of code.
+
+					*/
 					switch(pref) {
 
-						/**
-							In case the preference is to layout the annotations (labels) on the 
-							left or the right side -  the first heuristic I'm using is to place the 
-							labels also at the same coordinate on the y axis as the element to be annotated. 
-
-							There are some key aspects which need to be addressed :
-							- There might be multiple elements at the same Y coordinate and hence the labels 
-								may overlap
-							- There might be some minimum space policy required between labels
-							- A better policy w.r.t aesthetics might be to start laying out the labels 
-								from top to bottom based on their order but not strictly laying them out 
-								aligned to the Y coordinate of the annotated element. 
-							- The SVG element may be laid out in such a manner that there is space 
-								above and below the SVG element as well, in which case the first 
-								annotation should probably start at the beginning (top) of the div element
-									
-
-						*/
 						case "left-border":
-							$(annotation_array[i].annotation_selector).css("position","absolute")
-							.css("top",annotation_array[i].y+"px");
-
-							adjust_width_for_annotation(annotation_array[i].annotation_selector);
-
-						break;
-
 						case "right-border":
-							$(annotation_array[i].annotation_selector).css("position","absolute")
-							.css("top",annotation_array[i].y+"px")
-							.css("left",svg_width+"px");
-
-							adjust_width_for_annotation(annotation_array[i].annotation_selector);
+							width = $(annotated_elements[i].annotation_selector).width();
+							if(width > container_width-svg_width) {
+								$(annotated_elements[i].annotation_selector).css("width",container_width-svg_width+"px");
+							}
 						break;
 
 						case "top-border":
-							$(annotation_array[i].annotation_selector).css("position","absolute")
-							.css("left",annotation_array[i].x+"px");
-
-							adjust_height_for_annotation(annotation_array[i].annotation_selector);
-						break;
-
 						case "bottom-border":
-							$(annotation_array[i].annotation_selector).css("position","absolute")
-							.css("left",annotation_array[i].x+"px")
-							.css("top",svg_height+"px");
-
-							adjust_height_for_annotation(annotation_array[i].annotation_selector);
+							height = $(annotated_elements[i].annotation_selector).height();
+							if(height > container_height-svg_height) {
+								$(annotated_elements[i].annotation_selector).css("height",container_height-svg_height+"px");
+							}
 						break;
 
 					}
@@ -260,17 +224,11 @@
 
 
 				
-
 				/**
+					Creating an SVG for drawing lines which connect the labels 
+					to the annotated elements.
 
-					Need to write the code for drawing lines to connect the annotations with 
-					the labelled elements. 
-
-					This code will largely be independent of the layout happening in the code chunk 
-					above, which will need to be tweaked. 
-
-
-				*/
+				*/ 
 
 				
 				var NS = "http://www.w3.org/2000/svg";
@@ -282,20 +240,28 @@
 
 				$(div).get(0).appendChild(svg_for_lines);
 
-				var create_line = function(x1,y1,x2,y2){
-					console.log("x1 :"+x1+", y1:"+y1+", x2:"+x2+", y2:"+y2);
+
+
+				/**
+
+					A create line function which creates a line when given the 
+					params required
+
+				*/
+				var create_line = function(positions_object){
+					//console.log(positions_object);
 					var lineObj = document.createElementNS(NS,'line');
-					lineObj.setAttribute("x1",x1);
-					lineObj.setAttribute("y1",y1);
-					lineObj.setAttribute("x2",x2);
-					lineObj.setAttribute("y2",y2);
+					lineObj.setAttribute("x1",positions_object.x1);
+					lineObj.setAttribute("y1",positions_object.y1);
+					lineObj.setAttribute("x2",positions_object.x2);
+					lineObj.setAttribute("y2",positions_object.y2);
 					lineObj.setAttribute("style","stroke:rgb(0,0,0);stroke-width:1;opacity:0.5");
 					return lineObj;
 				}
 
 
 
-				for(var i =0; i < annotation_array.length;i++) {
+				for(var i =0; i < annotated_elements.length;i++) {
 
 					/**
 						The inner height/width property is used because it takes into account the padding and the 
@@ -318,75 +284,55 @@
 							(might be two straight lines or might be a curve depending on what looks 
 							elegant and what is the exact problem you are solving).
 
-
-
-
 					*/
-					var label_height = $(annotation_array[i].annotation_selector).innerHeight()
-					var label_width = $(annotation_array[i].annotation_selector).innerWidth()
+
+
+					var label_height = $(annotated_elements[i].annotation_selector).innerHeight()
+					var label_width = $(annotated_elements[i].annotation_selector).innerWidth()
 					
-					var label_position = $(annotation_array[i].annotation_selector).position();
-					console.log(label_position);
+					var label_position = $(annotated_elements[i].annotation_selector).position();
+					//console.log(label_position);
 					
 					var x_label = label_position.left;
 					var y_label = label_position.top;
 
-					var element_bounding_rect = $(annotation_array[i].element_selector).get(0).getBoundingClientRect();
+					var element_bounding_rect = $(annotated_elements[i].element_selector).get(0).getBoundingClientRect();
 
-					console.log("Element selector:"+annotation_array[i].element_selector);
-
-					console.log("x_label:"+x_label);
-					console.log("y_label:"+y_label);
-					console.log("label_width:"+label_width);
-					console.log("label_height:"+label_height);
-					console.log("element height:"+JSON.stringify(element_bounding_rect));
-
-					switch(pref) {
-
-						case "left-border":
+					/*
+						console.log("Element selector:"+annotated_elements[i].element_selector);
+						console.log("x_label:"+x_label);
+						console.log("y_label:"+y_label);
+						console.log("label_width:"+label_width);
+						console.log("label_height:"+label_height);
+						console.log("element height:"+JSON.stringify(element_bounding_rect));
+					*/
 
 
 
-							var line = create_line(x_label+label_width,
-							y_label+(label_height/2),
-							annotation_array[i].x,
-							annotation_array[i].y + (element_bounding_rect.height/2));	
+					line_positions_for_labels = {'left-border':{x1:x_label+label_width,
+							y1:y_label+(label_height/2),
+							x2:annotated_elements[i].x,
+							y2:annotated_elements[i].y + (element_bounding_rect.height/2)
+						},
+						'right-border':{x1:x_label,
+							y1:y_label+(label_height/2),
+							x2:annotated_elements[i].x+element_bounding_rect.width,
+							y2:annotated_elements[i].y + (element_bounding_rect.height/2)
+						},
+						'top-border':{x1:x_label +(label_width/2),
+							y1:y_label+label_height,
+							x2:annotated_elements[i].x+(element_bounding_rect.width/2),
+							y2:annotated_elements[i].y
+						},
+						'bottom-border':{x1:x_label +(label_width/2),
+							y1:y_label,
+							x2:annotated_elements[i].x+(element_bounding_rect.width/2),
+							y2:annotated_elements[i].y+element_bounding_rect.height
+						}
+					};
 
-							$("#svg_for_lines").get(0).appendChild(line);
-							
-
-						break;
-
-						case "right-border":
-							var line = create_line(x_label,
-							y_label+(label_height/2),
-							annotation_array[i].x+element_bounding_rect.width,
-							annotation_array[i].y + (element_bounding_rect.height/2));	
-
-							$("#svg_for_lines").get(0).appendChild(line);
-
-
-						break;
-
-						case "top-border":
-							var line = create_line(x_label +(label_width/2),
-							y_label+label_height,
-							annotation_array[i].x+(element_bounding_rect.width/2),
-							annotation_array[i].y);	
-
-							$("#svg_for_lines").get(0).appendChild(line);
-						break;
-
-						case "bottom-border":
-							var line = create_line(x_label +(label_width/2),
-							y_label,
-							annotation_array[i].x+(element_bounding_rect.width/2),
-							annotation_array[i].y+element_bounding_rect.height);	
-
-							$("#svg_for_lines").get(0).appendChild(line);
-						break;
-
-					}
+					var line = create_line(line_positions_for_labels[pref]);
+					$("#svg_for_lines").get(0).appendChild(line);
 
 				}
 			}
@@ -398,8 +344,8 @@
 			$( document ).ready(function() {
 				$("button").click(function(event) {
 					
-					var annotation_array = new Object();
-					var annotation_array = {
+					var annotated_elements = new Object();
+					var annotated_elements = {
 						'#tobacco':'#tobacco_ann',
 						'#ong':'#ong_ann',
 						'#bfs':'#bfs_ann',
@@ -407,7 +353,7 @@
 						'#manufacturing':'#manufacturing_ann',
 						'#mm':'#mm_ann'
 					};
-					layout("#base","#treemap","left-border",annotation_array);
+					layout("#base","#treemap","left-border",annotated_elements);
 					
 					
 
@@ -442,7 +388,7 @@
 				<p><strong>Source</strong>: <a href="http://www.moneycontrol.com/">Moneycontrol.com</a></p>
 				<p></p>
 			</div>
-			<button type="button">Layout elements</button>
+			<button id= "left_button" type="button">Left layout</button>
 
 			<div id="base">
 				<svg id="treemap" viewBox="0 0 640 450" preserveAspectRatio="xMinYMin meet">
