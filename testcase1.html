@@ -67,7 +67,7 @@
 				}
 			}
 
-			function layout(div,svg,pref,arr) {
+			function layout(div,svg,pref,arr,margin) {
 
 				/**
 					calculating basic height/width and div position properties for 
@@ -83,13 +83,14 @@
 
 				/**
 					Defining css settings for svg position based on 
-					label arrangement preferences.	
+					Margin supplied	
+
 				*/
 
 					
-				var svg_positioning_css_settings = {'left-border':{'left':container_width-svg_width+'px'},
+				var svg_positioning_css_settings = {'left-border':{'left':margin+'px'},
 					'right-border':{'left':'0px'},
-					'top-border':{'top':container_height-svg_height+"px"},
+					'top-border':{'top':margin+"px"},
 					'bottom-border':{'top':'0px'}
 				};
 
@@ -103,31 +104,53 @@
 
 				/**
 					Creating a new Array of objects which contain annotation properties like :
-					annotation_selector,annotated element selector,x, y axis w.r.t 
+					label_selector,annotated element selector,x, y axis w.r.t 
 					SVG element 
 				*/
 
 				var annotated_elements =[];
 				for (var prop in arr) {
-					if(arr.hasOwnProperty(prop)){
 
-						var element_positions = $(prop).offset();
+					var element_positions = $(prop).offset();
 
-						/**
-							calculating x and y co-ordinates of the element to be annotated 
-							by subtracting position of element from position of div. 
-						*/
-						var div_positions = $(div).offset();
-						var annotated_element = {annotation_selector:arr[prop],
-							element_selector:prop,
-							y:element_positions["top"]-div_positions["top"],
-							x:element_positions["left"]-div_positions["left"]
-						}
-						annotated_elements.push(annotated_element);
-						
-						console.log("final annotated elements:"+JSON.stringify(annotated_element));
-
+					/**
+						calculating x and y co-ordinates of the element to be annotated 
+						by subtracting position of element from position of div. 
+					*/
+					var div_positions = $(div).offset();
+					var annotated_element = {label_selector:arr[prop].label_selector,
+						label_width:arr[prop].width,
+						element_selector:prop,
+						y:element_positions["top"]-div_positions["top"],
+						x:element_positions["left"]-div_positions["left"]
 					}
+					$(annotated_element.label_selector).css("width",annotated_element.label_width);
+
+					annotated_element.height = $(annotated_element.label_selector).innerHeight();
+					/**
+						When solving for preferences, the top property can be specified differently, the 
+						left property can be specified differently
+					*/
+
+
+					/**
+
+						setting the label_top_property to the y axis property of the annotated element. 
+						This is being done to setup a default value of the top positioning property 
+						for the label element. 
+
+						Additionally - this piece of code is specific to left-border and will need to change when solving for 
+						all layout preferences. 
+
+					*/
+					annotated_element.label_top_property = annotated_element.y;
+
+
+					annotated_elements.push(annotated_element);
+
+					
+					console.log("final annotated elements:"+JSON.stringify(annotated_element));
+
 				}
 
 				/**
@@ -156,69 +179,31 @@
 
 				*/
 
+				var old_bottom = null;
+
+
+				for(var i =0;i<annotated_elements.length;i++) {
+
+					if(old_bottom!=null && annotated_elements[i].label_top_property < old_bottom){
+						annotated_elements[i].label_top_property = old_bottom;
+					}
+
+					/**
+
+						Old bottom doesn't take into account the margin of the label elements right now. 
+
+					*/
+					old_bottom = annotated_elements[i].label_top_property+annotated_elements[i].height;
+
+				}
+
 
 				for(var i =0; i < annotated_elements.length;i++) {
 
+					$(annotated_elements[i].label_selector).appendTo(div);
 
-					/**
-						In case the preference is to layout the annotations (labels) on the 
-						left or the right side -  the first heuristic I'm using is to place the 
-						labels also at the same coordinate on the y axis as the element to be annotated. 
-
-						There are some key aspects which need to be addressed :
-						- There might be multiple elements at the same Y coordinate and hence the labels 
-							may overlap
-						- There might be some minimum space policy required between labels
-						- A better policy w.r.t aesthetics might be to start laying out the labels 
-							from top to bottom based on their order but not strictly laying them out 
-							aligned to the Y coordinate of the annotated element. 
-						- The SVG element may be laid out in such a manner that there is space 
-							above and below the SVG element as well, in which case the first 
-							annotation should probably start at the beginning (top) of the div element
-
-					*/
-					$(annotated_elements[i].annotation_selector).appendTo(div);
-					var label_positioning_css_settings = {'left-border':{'top':annotated_elements[i].y+'px'},
-						'right-border':{'top':annotated_elements[i].y+'px','left':svg_width+'px'},
-						'top-border':{'left':annotated_elements[i].x+'px'},
-						'bottom-border':{'top':svg_height+'px','left':annotated_elements[i].x+'px'}
-					};
-
-
-					$(annotated_elements[i].annotation_selector).css("position","absolute")
-						.css(label_positioning_css_settings[pref]);
-
-
-					/**
-						Can't find an acceptable way to implement data driven programming
-						while adjusting height/width of the labels. 
-
-						Note to self : Don't really need to worry, because this part of the code 
-						is now redundant after conversation with Anand. 
-
-						Will implement the width adjustment of the elements based on user preference 
-						in next iteration of code.
-
-					*/
-					switch(pref) {
-
-						case "left-border":
-						case "right-border":
-							width = $(annotated_elements[i].annotation_selector).width();
-							if(width > container_width-svg_width) {
-								$(annotated_elements[i].annotation_selector).css("width",container_width-svg_width+"px");
-							}
-						break;
-
-						case "top-border":
-						case "bottom-border":
-							height = $(annotated_elements[i].annotation_selector).height();
-							if(height > container_height-svg_height) {
-								$(annotated_elements[i].annotation_selector).css("height",container_height-svg_height+"px");
-							}
-						break;
-
-					}
+					$(annotated_elements[i].label_selector).css("position","absolute")
+						.css('top',annotated_elements[i].label_top_property+'px');
 
 				}
 
@@ -287,10 +272,10 @@
 					*/
 
 
-					var label_height = $(annotated_elements[i].annotation_selector).innerHeight()
-					var label_width = $(annotated_elements[i].annotation_selector).innerWidth()
+					var label_height = $(annotated_elements[i].label_selector).innerHeight()
+					var label_width = $(annotated_elements[i].label_selector).innerWidth()
 					
-					var label_position = $(annotated_elements[i].annotation_selector).position();
+					var label_position = $(annotated_elements[i].label_selector).position();
 					//console.log(label_position);
 					
 					var x_label = label_position.left;
@@ -344,17 +329,15 @@
 			$( document ).ready(function() {
 				$("button").click(function(event) {
 					
-					var annotated_elements = new Object();
 					var annotated_elements = {
-						'#tobacco':'#tobacco_ann',
-						'#ong':'#ong_ann',
-						'#bfs':'#bfs_ann',
-						'#cd':'#cd_ann',
-						'#manufacturing':'#manufacturing_ann',
-						'#mm':'#mm_ann'
+						'#tobacco':{'label_selector':'#tobacco_ann','width':'120px'},
+						'#ong':{'label_selector':'#ong_ann','width':'200px'},
+						'#bfs':{'label_selector':'#bfs_ann','width':'240px'},
+						'#cd':{'label_selector':'#cd_ann','width':'200px'},
+						'#manufacturing':{'label_selector':'#manufacturing_ann','width':'250px'},
+						'#mm':{'label_selector':'#mm_ann','width':'150px'}
 					};
-					layout("#base","#treemap","left-border",annotated_elements);
-					
+					layout("#base","#treemap","left-border",annotated_elements,"300");
 					
 
 				});
